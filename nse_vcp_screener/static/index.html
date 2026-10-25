@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NSE VCP Pattern Screener — Free NSE Data</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="logo-icon">🍌</div>
+      <div>
+        <div class="brand-title">NSE<b>Patterns</b></div>
+        <div class="brand-tagline">Free NSE EOD Quantitative Base & VCP Screener</div>
+      </div>
+    </div>
+
+    <!-- Market Health Indicators -->
+    <div class="market-health" id="health-bar">
+      <div class="health-pill" id="health-regime">
+        <span class="dot"></span>
+        <span class="label">Regime:</span>
+        <span class="value" id="val-regime">Calculating...</span>
+      </div>
+      <div class="health-pill">
+        <span class="label">Uptrend:</span>
+        <span class="value" id="val-uptrend">--%</span>
+      </div>
+      <div class="health-pill">
+        <span class="label">Leaders (RS 80+):</span>
+        <span class="value" id="val-leaders">--</span>
+      </div>
+      <button class="btn-sync" id="btn-sync" title="Download latest NSE Bhavcopy">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+        Sync NSE EOD
+      </button>
+    </div>
+  </header>
+
+  <!-- Screener Controls Bar -->
+  <section class="controls-bar">
+    <div class="preset-selector">
+      <label for="sel-screen">Preset Screen:</label>
+      <select id="sel-screen">
+        <option value="h:VCP">🍌 VCP (Volatility Contraction Pattern)</option>
+        <option value="h:Blue sky">☁️ Blue Sky (All-Time High Bases)</option>
+        <option value="h:Multi-year breakouts">🚀 Multi-Year Breakouts (1+ Year Base)</option>
+        <option value="h:IPO base">🌱 IPO Base (Listed &lt; 1 Year)</option>
+        <option value="custom">⚙️ Custom Dials</option>
+      </select>
+    </div>
+
+    <div class="dials-toggle">
+      <button id="btn-toggle-dials" class="btn-dials">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Adjust Filter Dials
+      </button>
+    </div>
+  </section>
+
+  <!-- Filter Dials Panel (Collapsible) -->
+  <section class="dials-panel" id="dials-panel" style="display: none;">
+    <div class="dials-grid">
+      <div class="dial-item">
+        <label>Min Relative Strength (RS): <span id="lbl-rs">70</span></label>
+        <input type="range" id="dial-rs" min="1" max="99" value="70">
+      </div>
+      <div class="dial-item">
+        <label>Max Volatility Coil: <span id="lbl-coil">0.90x</span></label>
+        <input type="range" id="dial-coil" min="0.3" max="1.5" step="0.05" value="0.90">
+      </div>
+      <div class="dial-item">
+        <label>Max Volume Dry-up: <span id="lbl-dry">0.90x</span></label>
+        <input type="range" id="dial-dry" min="0.1" max="1.5" step="0.05" value="0.90">
+      </div>
+      <div class="dial-item">
+        <label>Min Base Weeks: <span id="lbl-baseWk">3w</span></label>
+        <input type="range" id="dial-baseWk" min="2" max="52" value="3">
+      </div>
+      <div class="dial-item">
+        <label>Max Base Depth %: <span id="lbl-depth">35%</span></label>
+        <input type="range" id="dial-depth" min="5" max="60" value="35">
+      </div>
+      <div class="dial-item">
+        <label>Min Price vs 50-DMA: <span id="lbl-vs50">-10%</span></label>
+        <input type="range" id="dial-vs50" min="-30" max="20" value="-10">
+      </div>
+    </div>
+    <div class="dials-actions">
+      <button class="btn-apply" id="btn-apply-dials">Apply Custom Dials</button>
+      <button class="btn-reset" id="btn-reset-dials">Reset to VCP Defaults</button>
+    </div>
+  </section>
+
+  <!-- The 4 Stage Tabs -->
+  <main class="main-content">
+    <nav class="stage-tabs" role="tablist">
+      <button class="stage-tab active" data-stage="p-k-watch">
+        <span class="tab-label">1. Forming</span>
+        <span class="tab-badge" id="badge-watch">0</span>
+      </button>
+      <button class="stage-tab" data-stage="p-k-trig">
+        <span class="tab-label">2. Fresh Breakouts</span>
+        <span class="tab-badge" id="badge-trig">0</span>
+      </button>
+      <button class="stage-tab" data-stage="p-k-hold">
+        <span class="tab-label">3. Climbing</span>
+        <span class="tab-badge" id="badge-hold">0</span>
+      </button>
+      <button class="stage-tab" data-stage="p-k-exit">
+        <span class="tab-label">4. Played Out</span>
+        <span class="tab-badge" id="badge-exit">0</span>
+      </button>
+    </nav>
+
+    <!-- Stage Subtitle & Definition -->
+    <div class="stage-description" id="stage-desc">
+      Showing market leaders pausing and coiling tighter under their resistance pivot line.
+    </div>
+
+    <!-- Screener Table Container -->
+    <div class="table-container">
+      <table class="screener-table">
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th>Price (₹)</th>
+            <th>Gain</th>
+            <th>RS</th>
+            <th>Pivot (₹)</th>
+            <th>Ext %</th>
+            <th>Base</th>
+            <th>Depth</th>
+            <th>Coil</th>
+            <th>Dry-up</th>
+            <th>Squats</th>
+            <th>Tier</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr>
+            <td colspan="13" class="loading-cell">Loading screening setups...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Interactive Candlestick Chart Modal -->
+  <div class="modal-backdrop" id="chart-modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h2 id="modal-stock-title">STOCK</h2>
+          <span class="modal-stock-sub" id="modal-stock-sub">Company Name</span>
+        </div>
+        <button class="modal-close" id="btn-close-modal">&times;</button>
+      </div>
+
+      <div class="modal-metrics-bar" id="modal-metrics">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="chart-wrapper">
+        <canvas id="chart-canvas" width="900" height="420"></canvas>
+      </div>
+      <div class="chart-legend">
+        <span><i class="legend-box" style="background:#26a69a"></i> Up Bar</span>
+        <span><i class="legend-box" style="background:#ef5350"></i> Down Bar</span>
+        <span><i class="legend-line" style="border-color:#ffc926"></i> Base Pivot</span>
+        <span><i class="legend-line" style="border-color:#29b6f6"></i> 50-DMA</span>
+        <span><i class="legend-line" style="border-color:#ab47bc"></i> 200-DMA</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
