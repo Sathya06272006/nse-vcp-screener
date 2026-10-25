@@ -8,6 +8,7 @@ from .pattern_detector import detect_base_and_vcp
 from .stages import classify_stage
 
 PRESET_SCREENS = {
+    "__all__": {},
     "h:VCP": {
         "coil": [0.3, 0.9],
         "dry": [0.05, 0.9],
@@ -133,10 +134,26 @@ def analyze_all_stocks(db_conn: Optional[sqlite3.Connection] = None) -> List[Dic
         
     return results
 
+def normalize_stock_keys(s: Dict[str, Any]) -> Dict[str, Any]:
+    """Ensures consistent alias resolution across BananaPatterns and native keys."""
+    norm = dict(s)
+    if norm.get('nearHigh') is None and norm.get('fromHigh') is not None:
+        norm['nearHigh'] = norm['fromHigh']
+    if norm.get('fromHigh') is None and norm.get('nearHigh') is not None:
+        norm['fromHigh'] = norm['nearHigh']
+    if norm.get('lvl') is None and norm.get('level') is not None:
+        norm['lvl'] = norm['level']
+    if norm.get('level') is None and norm.get('lvl') is not None:
+        norm['level'] = norm['lvl']
+    if norm.get('distpiv') is None and norm.get('ext') is not None:
+        norm['distpiv'] = abs(norm['ext'])
+    return norm
+
 def evaluate_filters(stocks: List[Dict[str, Any]], spec: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Filters stocks by comparing against range specs [min, max]."""
     filtered = []
-    for s in stocks:
+    for s_raw in stocks:
+        s = normalize_stock_keys(s_raw)
         matches = True
         for k, v in spec.items():
             if k in ("stage", "where", "exit", "lens"):
