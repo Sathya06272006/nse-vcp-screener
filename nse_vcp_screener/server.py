@@ -12,6 +12,7 @@ from typing import Dict, Any, Optional, List
 from .database import get_connection
 from .screener import run_screen, analyze_all_stocks, PRESET_SCREENS
 from .bhavcopy import download_daily_bhavcopy
+from .brief import MarketBriefEngine
 
 app = FastAPI(title="NSE VCP Pattern Screener", version="1.0.0")
 
@@ -128,6 +129,11 @@ async def api_market_health():
         "leaders": leaders,
         "regime": regime
     }
+
+@app.get("/api/brief")
+async def api_brief():
+    """Returns catalyst intelligence, quarterly results, and announcements."""
+    return MarketBriefEngine.get_market_brief()
 
 @app.post("/api/sync_bhavcopy")
 async def api_sync_bhavcopy(date_str: Optional[str] = None):
